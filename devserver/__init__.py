@@ -15,6 +15,31 @@ __docformat__ = 'restructuredtext en'
 
 import os
 
+import logging
+
+from devserver.dictconfig import dictConfig
+from devserver import settings
+
+default_loggers = ['django.db.sql', 'django.db.summary', 
+                   'django.request.ajax', 'django.request.profile.garbage', 
+                   'django.request.profile.summary', 'django.request.profile.memory',
+                   'django.request.session', 'django.cache']
+
+if settings.LOGGING and settings.LOGGING.has_key('loggers'):
+    dictConfig(settings.LOGGING)
+
+# sets a NullHandler for all the default loggers
+# this prevents warnings when you call a logger 
+# that hasn't been instantiated
+class NullHandler(logging.Handler): 
+    def emit(self, record): 
+        pass
+for logger in default_loggers:
+    if logger not in settings.LOGGING['loggers'].keys():
+        logger = logging.getLogger(logger)
+        logger.addHandler(NullHandler())
+        logger.propogate = False
+
 def _get_git_revision(path):
     revision_file = os.path.join(path, 'refs', 'heads', 'master')
     if not os.path.exists(revision_file):

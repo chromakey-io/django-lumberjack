@@ -11,7 +11,7 @@ from django.db import connection
 from django.db.backends import util
 #from django.template import Node
 
-from devserver.modules import DevServerModule
+from devserver.middleware import LoggingMiddleware
 #from devserver.utils.stack import tidy_stacktrace, get_template_info
 from devserver.utils.time import ms_from_timedelta
 from devserver import settings
@@ -71,16 +71,15 @@ class DatabaseStatTracker(util.CursorDebugWrapper):
                 sql = self.db.ops.last_executed_query(self.cursor, sql, params)
             except:
                 sql = sql % params
-
             if self.logger and (not settings.DEVSERVER_SQL_MIN_DURATION
                     or duration > settings.DEVSERVER_SQL_MIN_DURATION):
                 if settings.DEVSERVER_TRUNCATE_SQL:
                     sql = truncate_sql(sql, aggregates=settings.DEVSERVER_TRUNCATE_AGGREGATES)
                 message = sqlparse.format(sql, reindent=True, keyword_case='upper')
-            
-                self.logger.debug(message, duration=duration)
+
+                self.logger.debug(message, extra = {'duration':duration})
                 if self.cursor.rowcount >= 0:
-                    self.logger.debug('Found %s matching rows', self.cursor.rowcount, duration=duration)
+                    self.logger.debug('Found %s matching rows', self.cursor.rowcount, extra={'duration':duration})
             
             self.db.queries.append({
                 'sql': sql,
@@ -100,44 +99,45 @@ class DatabaseStatTracker(util.CursorDebugWrapper):
 
                 message = 'Executed %s times\n%s' % message
             
-                self.logger.debug(message, duration=duration)
-                self.logger.debug('Found %s matching rows', self.cursor.rowcount, duration=duration, id='query')
+                self.logger.debug(message, extra= {'duration':duration})
+                self.logger.debug('Found %s matching rows' % self.cursor.rowcount, extra = {'duration':duration, 'id':'query'})
             
             self.db.queries.append({
                 'sql': '%s times: %s' % (len(param_list), sql),
                 'time': duration,
             })
 
-class SQLRealTimeModule(DevServerModule):
+class RealTime(LoggingMiddleware):
     """
     Outputs SQL queries as they happen.
     """
     
-    logger_name = 'sql'
+    logger_name = 'django.db.sql'
     
-    def process_init(self, request):
+    def process_request(self, request):
         if not isinstance(util.CursorDebugWrapper, DatabaseStatTracker):
             self.old_cursor = util.CursorDebugWrapper
             util.CursorDebugWrapper = DatabaseStatTracker
         DatabaseStatTracker.logger = self.logger
     
-    def process_complete(self, request):
+    def process_response(self, request, response):
         if isinstance(util.CursorDebugWrapper, DatabaseStatTracker):
             util.CursorDebugWrapper = self.old_cursor
+        return response
 
-class SQLSummaryModule(DevServerModule):
+class Summary(LoggingMiddleware):
     """
     Outputs a summary SQL queries.
     """
     
-    logger_name = 'sql'
+    logger_name = 'django.db.summary'
     
-    def process_complete(self, request):
+    def process_response(self, request, response):
         num_queries = len(connection.queries)
         if num_queries:
             unique = set([s['sql'] for s in connection.queries])
-            self.logger.info('%(calls)s queries with %(dupes)s duplicates' % dict(
+            self.logger.debug('%(calls)s queries with %(dupes)s duplicates' % dict(
                 calls = num_queries,
                 dupes = num_queries - len(unique),
-            ), duration=sum(float(c.get('time', 0)) for c in connection.queries))
-        
+            ), extra={'duration':sum(float(c.get('time', 0)) for c in connection.queries)})
+        return response

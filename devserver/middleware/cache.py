@@ -1,18 +1,20 @@
 from django.core.cache import cache
 
-from devserver.modules import DevServerModule
+from devserver.middleware import LoggingMiddleware
 
-class CacheSummaryModule(DevServerModule):
+class CacheSummary(LoggingMiddleware):
     """
     Outputs a summary of cache events once a response is ready.
     """
 
-    logger_name = 'cache'
+    logger_name = LoggingMiddleware.logger_name +'.cache'
 
     attrs_to_track = ['set', 'get', 'delete', 'add', 'get_many']
     
-    def process_init(self, request):
+    def process_request(self, request):
         from devserver.utils.stats import track
+        from devserver.utils.stats import stats
+        stats.reset()
 
         # save our current attributes
         self.old = dict((k, getattr(cache, k)) for k in self.attrs_to_track)
@@ -20,7 +22,7 @@ class CacheSummaryModule(DevServerModule):
         for k in self.attrs_to_track:
             setattr(cache, k, track(getattr(cache, k), 'cache'))
 
-    def process_complete(self, request):
+    def process_response(self, request, response):
         from devserver.utils.stats import stats
 
         calls = stats.get_total_calls('cache')
@@ -37,9 +39,10 @@ class CacheSummaryModule(DevServerModule):
             ratio = ratio,
             hits = hits,
             misses = misses,
-        ), duration=stats.get_total_time('cache'))
+        ), extra = {'duration':stats.get_total_time('cache')})
 
         # set our attributes back to their defaults
         for k, v in self.old.iteritems():
             setattr(cache, k, v)
-        
+
+        return response

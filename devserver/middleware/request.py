@@ -1,11 +1,11 @@
-from devserver.modules import DevServerModule
+from devserver.middleware import LoggingMiddleware
 
-class SessionInfoModule(DevServerModule):
+class SessionInfo(LoggingMiddleware):
     """
     Displays information about the currently authenticated user and session.
     """
 
-    logger_name = 'session'
+    logger_name = LoggingMiddleware.logger_name + '.request.session'
     
     def process_request(self, request):
         self.has_session = bool(getattr(request, 'session', False))
@@ -24,7 +24,8 @@ class SessionInfoModule(DevServerModule):
             request.session.save = self._save
             self._save = None
             self.session = None
-        
+        return response
+
     def handle_session_save(self, *args, **kwargs):
         self._save(*args, **kwargs)
         self.logger.info('Session %s has been saved.', self.session.session_key)
