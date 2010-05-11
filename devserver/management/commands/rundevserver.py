@@ -5,7 +5,7 @@ import sys
 
 import django
 from django.core.servers.basehttp import run, AdminMediaHandler, WSGIServerException
-from devserver.handlers import DevServerHandler
+from django.core.handlers.wsgi import WSGIHandler
 
 def null_technical_500_response(request, exc_type, exc_value, tb):
     raise exc_type, exc_value, tb
@@ -80,7 +80,7 @@ class Command(BaseCommand):
             translation.activate(settings.LANGUAGE_CODE)
 
             try:
-                handler = AdminMediaHandler(DevServerHandler(), admin_media_path)
+                handler = AdminMediaHandler(WSGIHandler(), admin_media_path)
                 if use_werkzeug:
                     run_simple(addr, int(port), DebuggedApplication(handler, True),
                         use_reloader=use_reloader, use_debugger=True)
