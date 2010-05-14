@@ -16,22 +16,6 @@ from devserver.middleware import LoggingMiddleware
 from devserver.utils.time import ms_from_timedelta
 from devserver import settings
 
-try:
-    import sqlparse
-except ImportError:
-    class sqlparse:
-        @staticmethod
-        def format(text, *args, **kwargs):
-            return text
-
-import re
-_sql_fields_re = re.compile(r'SELECT .*? FROM')
-_sql_aggregates_re = re.compile(r'SELECT .*?(COUNT|SUM|AVERAGE|MIN|MAX).*? FROM')
-def truncate_sql(sql, aggregates=True):
-    if not aggregates and _sql_aggregates_re.match(sql):
-        return sql
-    return _sql_fields_re.sub('SELECT ... FROM', sql)
-
 # # TODO:This should be set in the toolbar loader as a default and panels should
 # # get a copy of the toolbar object with access to its config dictionary
 # SQL_WARNING_THRESHOLD = getattr(settings, 'DEVSERVER_CONFIG', {}) \
@@ -73,11 +57,8 @@ class DatabaseStatTracker(util.CursorDebugWrapper):
                 sql = sql % params
             if self.logger and (not settings.DEVSERVER_SQL_MIN_DURATION
                     or duration > settings.DEVSERVER_SQL_MIN_DURATION):
-                if settings.DEVSERVER_TRUNCATE_SQL:
-                    sql = truncate_sql(sql, aggregates=settings.DEVSERVER_TRUNCATE_AGGREGATES)
-                message = sqlparse.format(sql, reindent=True, keyword_case='upper')
-
-                self.logger.debug(message, extra = {'duration':duration})
+                
+                self.logger.debug(sql, extra = {'duration':duration})
                 if self.cursor.rowcount >= 0:
                     self.logger.debug('Found %s matching rows', self.cursor.rowcount, extra={'duration':duration})
             
@@ -95,7 +76,7 @@ class DatabaseStatTracker(util.CursorDebugWrapper):
             duration = ms_from_timedelta(stop - start)
             
             if self.logger:
-                message = sqlparse.format(sql, reindent=True, keyword_case='upper')
+                message = sql
 
                 message = 'Executed %s times\n%s' % message
             

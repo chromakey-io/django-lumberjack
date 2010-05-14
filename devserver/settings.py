@@ -1,36 +1,42 @@
 from django.conf import settings
 
-DEVSERVER_TRUNCATE_SQL = getattr(settings, 'DEVSERVER_TRUNCATE_SQL', True)
-
-DEVSERVER_TRUNCATE_AGGREGATES = getattr(settings, 'DEVSERVER_TRUNCATE_AGGREGATES', getattr(settings, 'DEVSERVER_TRUNCATE_AGGREGATES', False))
-
-# This variable gets set to True when we're running the devserver
-DEVSERVER_ACTIVE = False
-
-DEVSERVER_AJAX_CONTENT_LENGTH = getattr(settings, 'DEVSERVER_AJAX_CONTENT_LENGTH', 300)
-
-# Minimum time a query must execute to be shown, value is in MS
-DEVSERVER_SQL_MIN_DURATION = getattr(settings, 'DEVSERVER_SQL_MIN_DURATION', None)
-
 LOGGING = {
     'formatters': {
+        'error':{
+            '()':'devserver.formatters.tb.TracebackFormatter',
+            },
+        'sql' : {
+            '()':'devserver.formatters.sql.SQLFormatter',
+            'format':'[%(name)s] %(levelname)s (%(duration)sms) %(message)s',
+        },
         'default' : {
             'format' : '[%(name)s] %(levelname)s %(message)s',
         },
     },
     'handlers' : {
+        'sqlstream' : {
+            'class' : 'logging.StreamHandler',
+            'formatter' : 'sql',
+        },
+        'errorstream' : {
+            'class' : 'logging.StreamHandler',
+            'formatter' : 'error',
+            },
         'stream' : {
             'class' : 'logging.StreamHandler',
             'formatter' : 'default',
-            'level' : 'NOTSET',
         },
     },
     'loggers' : {
-        'django' : {
+        'django.db' : {
             'level' : 'DEBUG',
-            'handlers' : ['stream'],   #add additional handlers here (ie:email)
+            'handlers' : ['sqlstream'],   #add additional handlers here (ie:email)
+            },
+        'django.errors' : {
+            'level' : 'DEBUG',
+            'handlers' : ['errorstream'],   #add additional handlers here (ie:email)
+            },
         },
-    },
 }
 
 LOGGING = getattr(settings, 'LOGGING', LOGGING)
