@@ -101,6 +101,10 @@ Named Logging
 ----------------
 
 This is really what lumberjack brings to the table.
+{{{
+#!rst
+
+.. code-block:: python
 
 LOGGING = {
     'formatters': {
@@ -146,6 +150,7 @@ LOGGING = {
         },
 }
 
+}}}
 That seems pretty complex... but what it does is worth it.
 
 Basically each middleware will write to its own named logger.  
