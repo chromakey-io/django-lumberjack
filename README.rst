@@ -100,57 +100,52 @@ lumberjack.middleware.request.SessionInfoModule
 Named Logging
 ----------------
 
-This is really what lumberjack brings to the table.
-{{{
-#!rst
+This is really what lumberjack brings to the table.  setting::
 
-.. code-block:: python
+        LOGGING = {
+            'formatters': {
+                'errorhtml':{
+                    '()':'lumberjack.formatters.tb.TracebackFormatter',
+                    'output':'html',
+                    },
+                'errorterminal':{
+                    '()':'lumberjack.formatters.tb.TracebackFormatter',
+                    },
+                'sql' : {
+                    '()':'lumberjack.formatters.sql.SQLFormatter',
+                    'format':'[%(name)s] %(levelname)s (%(duration)sms) %(message)s',
+                },
+                'default' : {
+                    'format' : '[%(name)s] %(levelname)s %(message)s',
+                },
+            },
+            'handlers' : {
+                'erroremail' : {
+                    'class' : 'lumberjack.handlers.EmailHandler',
+                    'formatter' : 'errorhtml',
+                    },
+                'errorstream' : {
+                    'class' : 'logging.StreamHandler',
+                    'formatter' : 'errorterminal',
+                    },
+                'sqlstream' : {
+                    'class' : 'logging.StreamHandler',
+                    'formatter' : 'sql',
+                    },
+                },
+            },
+            'loggers' : {
+                'django.db' : {
+                    'level' : 'DEBUG',
+                    'handlers' : ['sqlstream'],   #add additional handlers here (ie:email)
+                    },
+                'django.errors' : {
+                    'level' : 'DEBUG',
+                    'handlers' : ['errorstream','erroremail'],   #add additional handlers here (ie:email)
+                    },
+                },
+        }
 
-LOGGING = {
-    'formatters': {
-        'errorhtml':{
-            '()':'lumberjack.formatters.tb.TracebackFormatter',
-            'output':'html',
-            },
-        'errorterminal':{
-            '()':'lumberjack.formatters.tb.TracebackFormatter',
-            },
-        'sql' : {
-            '()':'lumberjack.formatters.sql.SQLFormatter',
-            'format':'[%(name)s] %(levelname)s (%(duration)sms) %(message)s',
-        },
-        'default' : {
-            'format' : '[%(name)s] %(levelname)s %(message)s',
-        },
-    },
-    'handlers' : {
-        'erroremail' : {
-            'class' : 'lumberjack.handlers.EmailHandler',
-            'formatter' : 'errorhtml',
-            },
-        'errorstream' : {
-            'class' : 'logging.StreamHandler',
-            'formatter' : 'errorterminal',
-            },
-        'sqlstream' : {
-            'class' : 'logging.StreamHandler',
-            'formatter' : 'sql',
-            },
-        },
-    },
-    'loggers' : {
-        'django.db' : {
-            'level' : 'DEBUG',
-            'handlers' : ['sqlstream'],   #add additional handlers here (ie:email)
-            },
-        'django.errors' : {
-            'level' : 'DEBUG',
-            'handlers' : ['errorstream','erroremail'],   #add additional handlers here (ie:email)
-            },
-        },
-}
-
-}}}
 That seems pretty complex... but what it does is worth it.
 
 Basically each middleware will write to its own named logger.  
