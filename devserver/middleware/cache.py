@@ -1,6 +1,6 @@
 from django.core.cache import cache
 
-from devserver.middleware import LoggingMiddleware
+from lumberjack.middleware import LoggingMiddleware
 
 class CacheSummary(LoggingMiddleware):
     """
@@ -12,8 +12,8 @@ class CacheSummary(LoggingMiddleware):
     attrs_to_track = ['set', 'get', 'delete', 'add', 'get_many']
     
     def process_request(self, request):
-        from devserver.utils.stats import track
-        from devserver.utils.stats import stats
+        from lumberjack.utils.stats import track
+        from lumberjack.utils.stats import stats
         stats.reset()
 
         # save our current attributes
@@ -23,7 +23,7 @@ class CacheSummary(LoggingMiddleware):
             setattr(cache, k, track(getattr(cache, k), 'cache'))
 
     def process_response(self, request, response):
-        from devserver.utils.stats import stats
+        from lumberjack.utils.stats import stats
 
         calls = stats.get_total_calls('cache')
         hits = stats.get_total_hits('cache')

@@ -1,5 +1,5 @@
-from devserver.middleware import LoggingMiddleware
-from devserver.utils.time import ms_from_timedelta
+from lumberjack.middleware import LoggingMiddleware
+from lumberjack.utils.time import ms_from_timedelta
 
 from datetime import datetime
 

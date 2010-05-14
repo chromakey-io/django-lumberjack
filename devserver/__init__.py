@@ -17,8 +17,8 @@ import os
 
 import logging
 
-from devserver.dictconfig import dictConfig
-from devserver import settings
+from lumberjack.dictconfig import dictConfig
+from lumberjack import settings
 
 default_loggers = ['django.db.sql', 'django.db.summary', 
                    'django.request.ajax', 'django.request.profile.garbage', 

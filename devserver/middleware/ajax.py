@@ -1,5 +1,5 @@
-from devserver.middleware import LoggingMiddleware
-from devserver import settings
+from lumberjack.middleware import LoggingMiddleware
+from lumberjack import settings
 
 class AjaxDump(LoggingMiddleware):
     """

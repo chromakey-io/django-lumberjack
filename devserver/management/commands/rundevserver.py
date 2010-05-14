@@ -61,7 +61,7 @@ class Command(BaseCommand):
 
         def inner_run():
             # Flag the server as active
-            from devserver import settings
+            from lumberjack import settings
             settings.DEVSERVER_ACTIVE = True
             settings.DEBUG = True
 

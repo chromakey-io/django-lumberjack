@@ -11,10 +11,10 @@ from django.db import connection
 from django.db.backends import util
 #from django.template import Node
 
-from devserver.middleware import LoggingMiddleware
+from lumberjack.middleware import LoggingMiddleware
 #from devserver.utils.stack import tidy_stacktrace, get_template_info
-from devserver.utils.time import ms_from_timedelta
-from devserver import settings
+from lumberjack.utils.time import ms_from_timedelta
+from lumberjack import settings
 
 # # TODO:This should be set in the toolbar loader as a default and panels should
 # # get a copy of the toolbar object with access to its config dictionary

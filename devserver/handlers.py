@@ -17,7 +17,7 @@ class MockHandler(logging.Handler):
 
 class DatabaseHandler(logging.Handler):
     def emit(self, record):
-        from devserver.models import Log
+        from lumberjack.models import Log
         
         if hasattr(record, 'source'):
             source = record.source

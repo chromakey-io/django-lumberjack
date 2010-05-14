@@ -1,4 +1,4 @@
-from devserver.middleware import LoggingMiddleware
+from lumberjack.middleware import LoggingMiddleware
 
 class SessionInfo(LoggingMiddleware):
     """

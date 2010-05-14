@@ -3,10 +3,10 @@ from django.conf import settings
 LOGGING = {
     'formatters': {
         'error':{
-            '()':'devserver.formatters.tb.TracebackFormatter',
+            '()':'lumberjack.formatters.tb.TracebackFormatter',
             },
         'sql' : {
-            '()':'devserver.formatters.sql.SQLFormatter',
+            '()':'lumberjack.formatters.sql.SQLFormatter',
             'format':'[%(name)s] %(levelname)s (%(duration)sms) %(message)s',
         },
         'default' : {

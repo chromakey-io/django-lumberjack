@@ -5,7 +5,7 @@ except ImportError:
 
 from datetime import datetime
 
-from devserver.utils.time import ms_from_timedelta
+from lumberjack.utils.time import ms_from_timedelta
 
 __all__ = ('track', 'stats')
 
