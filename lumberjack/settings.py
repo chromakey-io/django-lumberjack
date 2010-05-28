@@ -4,10 +4,12 @@ LOGGING = {
     'formatters': {
         'error':{
             '()':'lumberjack.formatters.tb.TracebackFormatter',
+            'output':'terminal',
             },
         'sql' : {
             '()':'lumberjack.formatters.sql.SQLFormatter',
             'format':'[%(name)s] %(levelname)s (%(duration)sms) %(message)s',
+            'output':'terminal',
         },
         'default' : {
             'format' : '[%(name)s] %(levelname)s %(message)s',

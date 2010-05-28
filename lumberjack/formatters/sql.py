@@ -4,7 +4,7 @@ import re
 
 from pygments import highlight
 from pygments.lexers import MySqlLexer
-from pygments.formatters import TerminalFormatter, HtmlFormatter
+from pygments.formatters import TerminalFormatter, HtmlFormatter, NullFormatter
 
 class SQLFormatter:
 
@@ -23,8 +23,10 @@ class SQLFormatter:
 
         if output == 'html':
             self.formatter = HtmlFormatter()
-        else:
+        elif output == 'terminal':
             self.formatter = TerminalFormatter()
+        else:
+            self.formatter = NullFormatter()
 
     def format(self, record):
         message = record.getMessage()

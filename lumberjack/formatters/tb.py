@@ -25,8 +25,10 @@ class TracebackFormatter:
 
         if output == 'html':
             self.formatter = HtmlFormatter()
-        else:
+        elif output == 'terminal':
             self.formatter = TerminalFormatter()
+        else:
+            self.formatter = NullFormatter()
 
     def formatException(self, ei):
         """
