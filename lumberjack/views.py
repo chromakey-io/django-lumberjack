@@ -11,9 +11,16 @@ def server_error(request, template_name='500.html'):
     500 error handler.
     """
 
-    t = loader.get_template(template_name)
-
     logger = logging.getLogger('django.errors')
-    logger.error("Uncaught Exception", exc_info=True)
 
+    msg = 'Error (%s IP): %s' % ((request.META.get('REMOTE_ADDR') in settings.INTERNAL_IPS and 'internal' or 'EXTERNAL'), request.path)
+
+    try:
+        request_repr = repr(request)
+    except:
+        request_repr = "Request repr() unavailable"
+
+    logger.error(msg, exc_info=True, extra = {'request_repr':request_repr})
+
+    t = loader.get_template(template_name)
     return http.HttpResponseServerError(t.render(RequestContext(request)))

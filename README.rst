@@ -104,15 +104,13 @@ This is really what lumberjack brings to the table.  setting::
 
         LOGGING = {
             'formatters': {
-                'errorhtml':{
-                    '()':'lumberjack.formatters.tb.TracebackFormatter',
-                    'output':'html',
-                    },
                 'errorterminal':{
                     '()':'lumberjack.formatters.tb.TracebackFormatter',
+                    'output':'terminal',
                     },
                 'sql' : {
                     '()':'lumberjack.formatters.sql.SQLFormatter',
+                    'output':'terminal',
                     'format':'[%(name)s] %(levelname)s (%(duration)sms) %(message)s',
                 },
                 'default' : {
@@ -121,8 +119,7 @@ This is really what lumberjack brings to the table.  setting::
             },
             'handlers' : {
                 'erroremail' : {
-                    'class' : 'lumberjack.handlers.EmailHandler',
-                    'formatter' : 'errorhtml',
+                    'class' : 'lumberjack.handlers.AdminEmailHandler',
                     },
                 'errorstream' : {
                     'class' : 'logging.StreamHandler',
@@ -137,11 +134,11 @@ This is really what lumberjack brings to the table.  setting::
             'loggers' : {
                 'django.db' : {
                     'level' : 'DEBUG',
-                    'handlers' : ['sqlstream'],   #add additional handlers here (ie:email)
+                    'handlers' : ['sqlstream'],
                     },
                 'django.errors' : {
                     'level' : 'DEBUG',
-                    'handlers' : ['errorstream','erroremail'],   #add additional handlers here (ie:email)
+                    'handlers' : ['errorstream','erroremail'],
                     },
                 },
         }

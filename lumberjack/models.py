@@ -6,9 +6,8 @@ class Log(models.Model):
     datetime = models.DateTimeField(default=datetime.datetime.now)
     level = models.CharField(max_length=128)
     msg = models.TextField()
-    source = models.CharField(max_length=128, blank=True)
-    host = models.CharField(max_length=200, blank=True, null=True)
-
+    request_repr = models.TextField()
+    
     def abbrev_msg(self, maxlen=500):
         if len(self.msg) > maxlen:
             return u'%s ...' % self.msg[:maxlen]
