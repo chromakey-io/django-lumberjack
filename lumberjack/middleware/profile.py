@@ -5,7 +5,7 @@ from datetime import datetime
 
 import gc
 
-class ProfileSummary(LoggingMiddleware):
+class Summary(LoggingMiddleware):
     """
     Outputs a summary of cache events once a response is ready.
     """

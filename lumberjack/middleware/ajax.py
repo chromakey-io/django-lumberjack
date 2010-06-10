@@ -1,7 +1,7 @@
 from lumberjack.middleware import LoggingMiddleware
 from lumberjack import settings
 
-class AjaxDump(LoggingMiddleware):
+class Dump(LoggingMiddleware):
     """
     Dumps the content of all AJAX responses.
     """
@@ -11,6 +11,5 @@ class AjaxDump(LoggingMiddleware):
     def process_response(self, request, response):
         if request.is_ajax():
             # Let's do a quick test to see what kind of response we have
-            if len(response.content) < settings.DEVSERVER_AJAX_CONTENT_LENGTH:
-                self.logger.info(response.content)
+            self.logger.info(response.content)
         return response

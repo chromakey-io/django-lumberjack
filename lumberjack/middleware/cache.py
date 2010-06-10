@@ -2,7 +2,7 @@ from django.core.cache import cache
 
 from lumberjack.middleware import LoggingMiddleware
 
-class CacheSummary(LoggingMiddleware):
+class Summary(LoggingMiddleware):
     """
     Outputs a summary of cache events once a response is ready.
     """

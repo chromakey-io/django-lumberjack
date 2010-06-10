@@ -32,14 +32,14 @@ You will need to include ``devserver`` in your ``INSTALLED_APPS``::
 Specify modules to load via the ``MIDDLEWARE_CLASSES`` setting::
 
 	DEVSERVER_MODULES = (
-	    'lumberjack.middleware.sql.SQLRealTimeModule',
-	    'lumberjack.middleware.sql.SQLSummaryModule',
-	    'lumberjack.middleware.profile.ProfileSummaryModule',
+	    'lumberjack.middleware.sql.RealTime',
+	    'lumberjack.middleware.sql.Summary',
+	    'lumberjack.middleware.profile.Summary',
 
 	    # Modules not enabled by default
-	    'lumberjack.middleware.ajax.AjaxDumpModule',
-	    'lumberjack.middleware.profile.MemoryUseModule',
-	    'lumberjack.middleware.cache.CacheSummaryModule',
+	    'lumberjack.middleware.ajax.Dump',
+	    'lumberjack.middleware.profile.MemoryUse',
+	    'lumberjack.middleware.cache.Summary',
 	)
 
 ----------------
