@@ -31,7 +31,7 @@ You will need to include ``devserver`` in your ``INSTALLED_APPS``::
 
 Specify modules to load via the ``MIDDLEWARE_CLASSES`` setting::
 
-	DEVSERVER_MODULES = (
+	MIDDLEWARE_CLASSES = (
         # only available with DEBUG=True
         'lumberjack.middleware.sql.RealTime',
         'lumberjack.middleware.sql.Summary',
@@ -60,15 +60,15 @@ handler500 = "lumberjack.views.server_error"
 Usage
 -----
 
-As with the devserver app there is...
+There is the same rundevserver command as available in the devserver app...
+
+Though all of the middlewares will work regardless of which server you are running, the rundevserver command really only provides weurkzeug integration.
 
 	python manage.py rundevserver
 
 Note: This will force ``settings.DEBUG`` to ``True``.
 
-Though, all the loggers should work from within apache or what-have-you.  
-
-DEBUG must be on however, for the SQL modules to function.
+Though with DEBUG = True you will lose the 500 handler.
 
 -------
 Modules
@@ -76,29 +76,25 @@ Modules
 
 The modules are the same as the devserver, only the have been implemented as middleware.
 
-lumberjack.middleware.sql.SQLRealTimeModule
+lumberjack.middleware.sql.RealTime
   Outputs queries as they happen to the terminal, including time taken.
 
-lumberjack.middleware.sql.SQLSummaryModule
+lumberjack.middleware.sql.Summary
   Outputs a summary of your SQL usage.
 
-lumberjack.middleware.profile.ProfileSummaryModule
+lumberjack.middleware.profile.Summary
   Outputs a summary of the request performance.
 
-lumberjack.middleware.profile.MemoryUseModule
+lumberjack.middleware.profile.MemoryUse
   Outputs a notice when memory use is increased (at the end of a request cycle).
 
-lumberjack.middleware.cache.CacheSummaryModule
+lumberjack.middleware.cache.Summary
   Outputs a summary of your cache calls at the end of the request.
 
-lumberjack.middleware.ajax.AjaxDumpModule
+lumberjack.middleware.ajax.Dump
   Outputs the content of any AJAX responses
-  
-  Change the maximum response length to dump with the ``DEVSERVER_AJAX_CONTENT_LENGTH`` setting::
-  
-  	DEVSERVER_AJAX_CONTENT_LENGTH = 300
 
-lumberjack.middleware.request.SessionInfoModule
+lumberjack.middleware.request.SessionInfo
   Outputs information about the current session and user.
 
 
