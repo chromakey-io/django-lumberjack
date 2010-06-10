@@ -66,5 +66,5 @@ LOGGING = {
         },
 }
 
-if settings.LOGGING:
+if hasattr(settings, 'LOGGING') and settings.LOGGING:
     LOGGING = getattr(settings, 'LOGGING', LOGGING)
