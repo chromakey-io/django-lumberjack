@@ -41,17 +41,30 @@ LOGGING = {
     'loggers' : {
         'django.db' : {
             'level' : 'DEBUG',
-            'handlers' : ['sqlstream'],   #add additional handlers here (ie:email)
+            'handlers' : ['sqlstream'],
             },
         'django.errors' : {
             'level' : 'DEBUG',
-            'handlers' : ['errorstream'],   #add additional handlers here (ie:email)
+            'handlers' : ['errorstream'],
             },
         'django.ajax' :{
             'level' : 'DEBUG',
             'handlers' : ['ajaxstream'],
             },
+        'django.profile' :{
+            'level' : 'DEBUG',
+            'handlers' : ['stream'],
+            },
+        'django.cache' :{
+            'level' : 'DEBUG',
+            'handlers' : ['stream'],
+            },
+        'django.request' :{
+            'level' : 'DEBUG',
+            'handlers' : ['stream'],
+            },
         },
 }
 
-LOGGING = getattr(settings, 'LOGGING', LOGGING)
+if settings.LOGGING:
+    LOGGING = getattr(settings, 'LOGGING', LOGGING)

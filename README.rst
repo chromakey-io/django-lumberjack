@@ -32,14 +32,19 @@ You will need to include ``devserver`` in your ``INSTALLED_APPS``::
 Specify modules to load via the ``MIDDLEWARE_CLASSES`` setting::
 
 	DEVSERVER_MODULES = (
-	    'lumberjack.middleware.sql.RealTime',
-	    'lumberjack.middleware.sql.Summary',
-	    'lumberjack.middleware.profile.Summary',
+        # only available with DEBUG=True
+        'lumberjack.middleware.sql.RealTime',
+        'lumberjack.middleware.sql.Summary',
 
-	    # Modules not enabled by default
-	    'lumberjack.middleware.ajax.Dump',
-	    'lumberjack.middleware.profile.MemoryUse',
-	    'lumberjack.middleware.cache.Summary',
+        'lumberjack.middleware.profile.Summary',
+        'lumberjack.middleware.profile.UncollectedGarbage',
+        'lumberjack.middleware.profile.MemoryUse',
+
+        'lumberjack.middleware.request.SessionInfo',
+
+        'lumberjack.middleware.ajax.Dump',
+
+        'lumberjack.middleware.cache.Summary',
 	)
 
 ----------------
@@ -47,6 +52,7 @@ Specify modules to load via the ``MIDDLEWARE_CLASSES`` setting::
 ----------------
 
 Put this in your urls to get tracebacks to log.  This is here rather than a middleware, so that you can log middleware exceptions.
+This only will work when DEBUG=False due to the way django handles exceptions.
 
 handler500 = "lumberjack.views.server_error"
 
