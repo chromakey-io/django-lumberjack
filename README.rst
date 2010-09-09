@@ -2,9 +2,11 @@
 About
 -----
 
-This is a mash-up of jogging and django-devserver.
+This is a logging server that tries to follow best practices with django and python.
 
-I removed a few features, and added some in the process.
+It is highly customizable.  All included modules are optional, and follow with best practices of established tools it utilizes.  The entry-points for the loggers in django occur entirely through middlewares.  The loggers are designed around python's feature rich logging system rather than built from scratch.
+
+*new support for arecibo.. woohoo!*
 
 ------------
 Installation
@@ -12,17 +14,17 @@ Installation
 
 To install the latest stable version::
 
-	pip install git+git://github.com/dcramer/django-devserver#egg=django-devserver
+	pip install git+git://github.com/kevin/django-lumberjack#egg=django-lumberjack
 
 
-django-devserver has some optional dependancies, which we highly recommend installing.
+django-lumberjack has some optional dependancies, which we highly recommend installing for development.
 
 * ``pip install sqlparse`` -- pretty SQL formatting
 * ``pip install werkzeug`` -- interactive debugger
 * ``pip install guppy`` -- tracks memory usage (required for MemoryUseModule)
 * ``pip install pygments`` --highlights tracebacks and sql
 
-You will need to include ``devserver`` in your ``INSTALLED_APPS``::
+You will need to include ``lumberjack`` in your ``INSTALLED_APPS``::
 
 	INSTALLED_APPS = (
 	    'lumberjack',
@@ -31,7 +33,7 @@ You will need to include ``devserver`` in your ``INSTALLED_APPS``::
 
 Specify modules to load via the ``MIDDLEWARE_CLASSES`` setting::
 
-	DEVSERVER_MODULES = (
+	  (
 	    'lumberjack.middleware.sql.SQLRealTimeModule',
 	    'lumberjack.middleware.sql.SQLSummaryModule',
 	    'lumberjack.middleware.profile.ProfileSummaryModule',
@@ -60,15 +62,13 @@ As with the devserver app there is...
 
 Note: This will force ``settings.DEBUG`` to ``True``.
 
-Though, all the loggers should work from within apache or what-have-you.  
-
-DEBUG must be on however, for the SQL modules to function.
+This is necessary only if you want to use workzeug.  All of the middlewares will work with the regular runserver.
 
 -------
 Modules
 -------
 
-The modules are the same as the devserver, only the have been implemented as middleware.
+The modules are the same as the devserver, only the have been implemented as middleware and simplified.
 
 lumberjack.middleware.sql.SQLRealTimeModule
   Outputs queries as they happen to the terminal, including time taken.
@@ -87,10 +87,6 @@ lumberjack.middleware.cache.CacheSummaryModule
 
 lumberjack.middleware.ajax.AjaxDumpModule
   Outputs the content of any AJAX responses
-  
-  Change the maximum response length to dump with the ``DEVSERVER_AJAX_CONTENT_LENGTH`` setting::
-  
-  	DEVSERVER_AJAX_CONTENT_LENGTH = 300
 
 lumberjack.middleware.request.SessionInfoModule
   Outputs information about the current session and user.

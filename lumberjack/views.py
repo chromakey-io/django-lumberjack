@@ -20,7 +20,7 @@ def server_error(request, template_name='500.html'):
     except:
         request_repr = "Request repr() unavailable"
 
-    logger.error(msg, exc_info=True, extra = {'request_repr':request_repr})
+    logger.error(msg, exc_info=True, extra = {'request_repr':request_repr, 'url':request.build_absolute_uri()})
 
     t = loader.get_template(template_name)
     return http.HttpResponseServerError(t.render(RequestContext(request)))

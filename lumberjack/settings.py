@@ -28,6 +28,12 @@ LOGGING = {
             'class' : 'logging.StreamHandler',
             'formatter' : 'default',
         },
+        #'errorarecibo' : {
+        #    'class' : 'lumberjack.handlers.AreciboHandler',
+        #    'server': 'http://your-arebico-instance.appspot.com/',
+        #    'account': 'public_account_password',
+        #    },
+        # requires python-arecibo lib
     },
     'loggers' : {
         'django.db' : {
