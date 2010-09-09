@@ -33,15 +33,20 @@ You will need to include ``lumberjack`` in your ``INSTALLED_APPS``::
 
 Specify modules to load via the ``MIDDLEWARE_CLASSES`` setting::
 
-	  (
-	    'lumberjack.middleware.sql.SQLRealTimeModule',
-	    'lumberjack.middleware.sql.SQLSummaryModule',
-	    'lumberjack.middleware.profile.ProfileSummaryModule',
+	MIDDLEWARE_CLASSES = (
+        # only available with DEBUG=True
+        'lumberjack.middleware.sql.RealTime',
+        'lumberjack.middleware.sql.Summary',
 
-	    # Modules not enabled by default
-	    'lumberjack.middleware.ajax.AjaxDumpModule',
-	    'lumberjack.middleware.profile.MemoryUseModule',
-	    'lumberjack.middleware.cache.CacheSummaryModule',
+        'lumberjack.middleware.profile.Summary',
+        'lumberjack.middleware.profile.UncollectedGarbage',
+        'lumberjack.middleware.profile.MemoryUse',
+
+        'lumberjack.middleware.request.SessionInfo',
+
+        'lumberjack.middleware.ajax.Dump',
+
+        'lumberjack.middleware.cache.Summary',
 	)
 
 ----------------
@@ -49,6 +54,7 @@ Specify modules to load via the ``MIDDLEWARE_CLASSES`` setting::
 ----------------
 
 Put this in your urls to get tracebacks to log.  This is here rather than a middleware, so that you can log middleware exceptions.
+This only will work when DEBUG=False due to the way django handles exceptions.
 
 handler500 = "lumberjack.views.server_error"
 
@@ -56,13 +62,19 @@ handler500 = "lumberjack.views.server_error"
 Usage
 -----
 
-As with the devserver app there is...
+There is the same rundevserver command as available in the devserver app...
+
+Though all of the middlewares will work regardless of which server you are running, the rundevserver command really only provides weurkzeug integration.
 
 	python manage.py rundevserver
 
 Note: This will force ``settings.DEBUG`` to ``True``.
 
+<<<<<<< HEAD
 This is necessary only if you want to use workzeug.  All of the middlewares will work with the regular runserver.
+=======
+Though with DEBUG = True you will lose the 500 handler.
+>>>>>>> 6948201e5c6de413952eb6a34c7e65087c62bf4c
 
 -------
 Modules
@@ -70,25 +82,25 @@ Modules
 
 The modules are the same as the devserver, only the have been implemented as middleware and simplified.
 
-lumberjack.middleware.sql.SQLRealTimeModule
+lumberjack.middleware.sql.RealTime
   Outputs queries as they happen to the terminal, including time taken.
 
-lumberjack.middleware.sql.SQLSummaryModule
+lumberjack.middleware.sql.Summary
   Outputs a summary of your SQL usage.
 
-lumberjack.middleware.profile.ProfileSummaryModule
+lumberjack.middleware.profile.Summary
   Outputs a summary of the request performance.
 
-lumberjack.middleware.profile.MemoryUseModule
+lumberjack.middleware.profile.MemoryUse
   Outputs a notice when memory use is increased (at the end of a request cycle).
 
-lumberjack.middleware.cache.CacheSummaryModule
+lumberjack.middleware.cache.Summary
   Outputs a summary of your cache calls at the end of the request.
 
-lumberjack.middleware.ajax.AjaxDumpModule
+lumberjack.middleware.ajax.Dump
   Outputs the content of any AJAX responses
 
-lumberjack.middleware.request.SessionInfoModule
+lumberjack.middleware.request.SessionInfo
   Outputs information about the current session and user.
 
 

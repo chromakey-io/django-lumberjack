@@ -55,9 +55,7 @@ class DatabaseStatTracker(util.CursorDebugWrapper):
                 sql = self.db.ops.last_executed_query(self.cursor, sql, params)
             except:
                 sql = sql % params
-            if self.logger and (not settings.DEVSERVER_SQL_MIN_DURATION
-                    or duration > settings.DEVSERVER_SQL_MIN_DURATION):
-                
+            if self.logger:
                 self.logger.debug(sql, extra = {'duration':duration})
                 if self.cursor.rowcount >= 0:
                     self.logger.debug('Found %s matching rows', self.cursor.rowcount, extra={'duration':duration})

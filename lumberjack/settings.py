@@ -11,6 +11,11 @@ LOGGING = {
             'format':'[%(name)s] %(levelname)s (%(duration)sms) %(message)s',
             'output':'terminal',
         },
+        'ajax' : {
+            '()':'lumberjack.formatters.ajax.AjaxFormatter',
+            'format':'[%(name)s] %(levelname)s %(message)s',
+            'output':'terminal',
+        },
         'default' : {
             'format' : '[%(name)s] %(levelname)s %(message)s',
         },
@@ -23,6 +28,10 @@ LOGGING = {
         'errorstream' : {
             'class' : 'logging.StreamHandler',
             'formatter' : 'error',
+            },
+        'ajaxstream' : {
+            'class' : 'logging.StreamHandler',
+            'formatter' : 'ajax',
             },
         'stream' : {
             'class' : 'logging.StreamHandler',
@@ -38,13 +47,30 @@ LOGGING = {
     'loggers' : {
         'django.db' : {
             'level' : 'DEBUG',
-            'handlers' : ['sqlstream'],   #add additional handlers here (ie:email)
+            'handlers' : ['sqlstream'],
             },
         'django.errors' : {
             'level' : 'DEBUG',
-            'handlers' : ['errorstream'],   #add additional handlers here (ie:email)
+            'handlers' : ['errorstream'],
+            },
+        'django.ajax' :{
+            'level' : 'DEBUG',
+            'handlers' : ['ajaxstream'],
+            },
+        'django.profile' :{
+            'level' : 'DEBUG',
+            'handlers' : ['stream'],
+            },
+        'django.cache' :{
+            'level' : 'DEBUG',
+            'handlers' : ['stream'],
+            },
+        'django.request' :{
+            'level' : 'DEBUG',
+            'handlers' : ['stream'],
             },
         },
 }
 
-LOGGING = getattr(settings, 'LOGGING', LOGGING)
+if hasattr(settings, 'LOGGING') and settings.LOGGING:
+    LOGGING = getattr(settings, 'LOGGING', LOGGING)
