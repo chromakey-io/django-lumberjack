@@ -1,5 +1,26 @@
+# This is a copy of the Python logging.config.dictconfig module,
+# reproduced with permission. It is provided here for backwards
+# compatibility for Python versions prior to 2.7.
+#
+# Copyright 2009-2010 by Vinay Sajip. All Rights Reserved.
+#
+# Permission to use, copy, modify, and distribute this software and its
+# documentation for any purpose and without fee is hereby granted,
+# provided that the above copyright notice appear in all copies and that
+# both that copyright notice and this permission notice appear in
+# supporting documentation, and that the name of Vinay Sajip
+# not be used in advertising or publicity pertaining to distribution
+# of the software without specific, written prior permission.
+# VINAY SAJIP DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
+# ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL
+# VINAY SAJIP BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR
+# ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER
+# IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
+# OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
 import logging.handlers
 import re
+import sys
 import types
 
 IDENTIFIER = re.compile('^[a-z_][a-z0-9_]*$', re.I)
@@ -51,7 +72,7 @@ class ConvertingDict(dict):
                 result.parent = self
                 result.key = key
         return result
-        
+
     def get(self, key, default=None):
         value = dict.get(self, key, default)
         result = self.configurator.convert(value)
@@ -63,7 +84,7 @@ class ConvertingDict(dict):
                 result.parent = self
                 result.key = key
         return result
-        
+
     def pop(self, key, default=None):
         value = dict.pop(self, key, default)
         result = self.configurator.convert(value)
@@ -113,7 +134,7 @@ class BaseConfigurator(object):
     """
     The configurator base class which defines some useful defaults.
     """
-    
+
     CONVERT_PATTERN = re.compile(r'^(?P<prefix>[a-z]+)://(?P<suffix>.*)$')
 
     WORD_PATTERN = re.compile(r'^\s*(\w+)\s*')
@@ -140,20 +161,26 @@ class BaseConfigurator(object):
         """
         name = s.split('.')
         used = name.pop(0)
-        found = self.importer(used)
-        for frag in name:
-            used += '.' + frag
-            try:
-                found = getattr(found, frag)
-            except AttributeError:
-                self.importer(used)
-                found = getattr(found, frag)
-        return found
+        try:
+            found = self.importer(used)
+            for frag in name:
+                used += '.' + frag
+                try:
+                    found = getattr(found, frag)
+                except AttributeError:
+                    self.importer(used)
+                    found = getattr(found, frag)
+            return found
+        except ImportError:
+            e, tb = sys.exc_info()[1:]
+            v = ValueError('Cannot resolve %r: %s' % (s, e))
+            v.__cause__, v.__traceback__ = e, tb
+            raise v
 
     def ext_convert(self, value):
         """Default converter for the ext:// protocol."""
         return self.resolve(value)
-    
+
     def cfg_convert(self, value):
         """Default converter for the cfg:// protocol."""
         rest = value
@@ -215,7 +242,7 @@ class BaseConfigurator(object):
                     converter = getattr(self, converter)
                     value = converter(suffix)
         return value
-    
+
     def configure_custom(self, config):
         """Configure an object with a user-supplied factory."""
         c = config.pop('()')
@@ -230,6 +257,12 @@ class BaseConfigurator(object):
                 setattr(result, name, value)
         return result
 
+    def as_tuple(self, value):
+        """Utility function which converts lists to tuples."""
+        if isinstance(value, list):
+            value = tuple(value)
+        return value
+
 class DictConfigurator(BaseConfigurator):
     """
     Configure logging using a dictionary-like object to describe the
@@ -240,26 +273,33 @@ class DictConfigurator(BaseConfigurator):
         """Do the configuration."""
 
         config = self.config
+        if 'version' not in config:
+            raise ValueError("dictionary doesn't specify a version")
+        if config['version'] != 1:
+            raise ValueError("Unsupported version: %s" % config['version'])
         incremental = config.pop('incremental', False)
         EMPTY_DICT = {}
         logging._acquireLock()
         try:
             if incremental:
                 handlers = config.get('handlers', EMPTY_DICT)
-                for name in handlers:
-                    if name not in logging._handlers:
-                        raise ValueError('No handler found with '
-                                         'name %r'  % name)
-                    else:
-                        try:
-                            handler = logging._handlers[name]
-                            handler_config = handlers[name]
-                            level = handler_config.get('level', None)
-                            if level:
-                                handler.setLevel(_checkLevel(level))
-                        except StandardError, e:
-                            raise ValueError('Unable to configure handler '
-                                             '%r: %s' % (name, e))
+                # incremental handler config only if handler name
+                # ties in to logging._handlers (Python 2.7)
+                if sys.version_info[:2] == (2, 7):
+                    for name in handlers:
+                        if name not in logging._handlers:
+                            raise ValueError('No handler found with '
+                                             'name %r'  % name)
+                        else:
+                            try:
+                                handler = logging._handlers[name]
+                                handler_config = handlers[name]
+                                level = handler_config.get('level', None)
+                                if level:
+                                    handler.setLevel(_checkLevel(level))
+                            except StandardError, e:
+                                raise ValueError('Unable to configure handler '
+                                                 '%r: %s' % (name, e))
                 loggers = config.get('loggers', EMPTY_DICT)
                 for name in loggers:
                     try:
@@ -276,10 +316,10 @@ class DictConfigurator(BaseConfigurator):
                                          'logger: %s' % e)
             else:
                 disable_existing = config.pop('disable_existing_loggers', True)
-                
+
                 logging._handlers.clear()
                 del logging._handlerList[:]
-                    
+
                 # Do formatters first - they don't refer to anything else
                 formatters = config.get('formatters', EMPTY_DICT)
                 for name in formatters:
@@ -311,7 +351,7 @@ class DictConfigurator(BaseConfigurator):
                         raise ValueError('Unable to configure handler '
                                          '%r: %s' % (name, e))
                 # Next, do loggers - they refer to handlers and filters
-                
+
                 #we don't want to lose the existing loggers,
                 #since other threads may have pointers to them.
                 #existing is set to contain all existing loggers,
@@ -349,7 +389,7 @@ class DictConfigurator(BaseConfigurator):
                     except StandardError, e:
                         raise ValueError('Unable to configure logger '
                                          '%r: %s' % (name, e))
-                    
+
                 #Disable any old loggers. There's no point deleting
                 #them as other threads may continue to hold references
                 #and by disabling them, you stop them doing any logging.
@@ -363,12 +403,12 @@ class DictConfigurator(BaseConfigurator):
                         logger.propagate = True
                     elif disable_existing:
                         logger.disabled = True
-    
+
                 # And finally, do the root logger
                 root = config.get('root', None)
                 if root:
                     try:
-                        self.configure_root(root)                        
+                        self.configure_root(root)
                     except StandardError, e:
                         raise ValueError('Unable to configure root '
                                          'logger: %s' % e)
@@ -396,7 +436,7 @@ class DictConfigurator(BaseConfigurator):
             dfmt = config.get('datefmt', None)
             result = logging.Formatter(fmt, dfmt)
         return result
-    
+
     def configure_filter(self, config):
         """Configure a filter from a dictionary."""
         if '()' in config:
@@ -440,6 +480,12 @@ class DictConfigurator(BaseConfigurator):
                 except StandardError, e:
                     raise ValueError('Unable to set target handler '
                                      '%r: %s' % (config['target'], e))
+            elif issubclass(klass, logging.handlers.SMTPHandler) and\
+                'mailhost' in config:
+                config['mailhost'] = self.as_tuple(config['mailhost'])
+            elif issubclass(klass, logging.handlers.SysLogHandler) and\
+                'address' in config:
+                config['address'] = self.as_tuple(config['address'])
             factory = klass
         kwargs = dict([(k, config[k]) for k in config if valid_ident(k)])
         try:
@@ -486,7 +532,7 @@ class DictConfigurator(BaseConfigurator):
             filters = config.get('filters', None)
             if filters:
                 self.add_filters(logger, filters)
-        
+
     def configure_logger(self, name, config, incremental=False):
         """Configure a non-root logger from a dictionary."""
         logger = logging.getLogger(name)
@@ -494,7 +540,7 @@ class DictConfigurator(BaseConfigurator):
         propagate = config.get('propagate', None)
         if propagate is not None:
             logger.propagate = propagate
-            
+
     def configure_root(self, config, incremental=False):
         """Configure a root logger from a dictionary."""
         root = logging.getLogger()

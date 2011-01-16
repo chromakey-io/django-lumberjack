@@ -20,9 +20,10 @@ To install the latest stable version::
 django-lumberjack has some optional dependancies, which we highly recommend installing for development.
 
 * ``pip install sqlparse`` -- pretty SQL formatting
+* ``pip install pygments`` -- highlights tracebacks and sql
+
 * ``pip install werkzeug`` -- interactive debugger
 * ``pip install guppy`` -- tracks memory usage (required for MemoryUseModule)
-* ``pip install pygments`` --highlights tracebacks and sql
 
 You will need to include ``lumberjack`` in your ``INSTALLED_APPS``::
 
@@ -70,11 +71,10 @@ Though all of the middlewares will work regardless of which server you are runni
 
 Note: This will force ``settings.DEBUG`` to ``True``.
 
-<<<<<<< HEAD
 This is necessary only if you want to use workzeug.  All of the middlewares will work with the regular runserver.
 =======
 Though with DEBUG = True you will lose the 500 handler.
->>>>>>> 6948201e5c6de413952eb6a34c7e65087c62bf4c
+
 
 -------
 Modules
@@ -108,36 +108,56 @@ lumberjack.middleware.request.SessionInfo
 Named Logging
 ----------------
 
-This is really what lumberjack brings to the table.  setting::
+This is really what lumberjack brings to the table. Let your imagination run wild with what the formatters and handlers will allow you to do... included are some simple examples. setting::
 
         LOGGING = {
+            'version': 1,
+            'disable_existing_loggers': False,
+
             'formatters': {
-                'errorterminal':{
-                    '()':'lumberjack.formatters.tb.TracebackFormatter',
+                'error' : {
+                    '()': 'lumberjack.formatters.tb.TracebackFormatter',
                     'output':'terminal',
-                    },
+                    'format' : ('%(client_ip)s - [%(date_time)s] - "%(request_method)s"'
+                                '%(content_length)s [%(url)s] \n %(exc_text)s' ),
+                },
                 'sql' : {
                     '()':'lumberjack.formatters.sql.SQLFormatter',
-                    'output':'terminal',
                     'format':'[%(name)s] %(levelname)s (%(duration)sms) %(message)s',
+                    'output':'terminal',
+                },
+                'ajax' : {
+                    '()':'lumberjack.formatters.ajax.AjaxFormatter',
+                    'format':'[%(name)s] %(levelname)s %(message)s',
+                    'output':'terminal',
                 },
                 'default' : {
                     'format' : '[%(name)s] %(levelname)s %(message)s',
                 },
             },
             'handlers' : {
-                'erroremail' : {
-                    'class' : 'lumberjack.handlers.AdminEmailHandler',
-                    },
                 'errorstream' : {
                     'class' : 'logging.StreamHandler',
-                    'formatter' : 'errorterminal',
+                    'formatter' : 'error',
                     },
                 'sqlstream' : {
                     'class' : 'logging.StreamHandler',
                     'formatter' : 'sql',
                     },
+                'ajaxstream' : {
+                    'class' : 'logging.StreamHandler',
+                    'formatter' : 'ajax',
+                    },
+                'stream' : {
+                    'class' : 'logging.StreamHandler',
+                    'formatter' : 'default',
                 },
+                #'errorarecibo' : {
+                #    'class' : 'lumberjack.handlers.AreciboHandler',
+                #    'server': 'http://your-arebico-instance.appspot.com/',
+                #    'account': 'public_account_password',
+                #    },
+                # requires python-arecibo lib
             },
             'loggers' : {
                 'django.db' : {
@@ -146,7 +166,23 @@ This is really what lumberjack brings to the table.  setting::
                     },
                 'django.errors' : {
                     'level' : 'DEBUG',
-                    'handlers' : ['errorstream','erroremail'],
+                    'handlers' : ['errorstream'],
+                    },
+                'django.ajax' :{
+                    'level' : 'DEBUG',
+                    'handlers' : ['ajaxstream'],
+                    },
+                'django.profile' :{
+                    'level' : 'DEBUG',
+                    'handlers' : ['stream'],
+                    },
+                'django.cache' :{
+                    'level' : 'DEBUG',
+                    'handlers' : ['stream'],
+                    },
+                'django.request' :{
+                    'level' : 'DEBUG',
+                    'handlers' : ['stream'],
                     },
                 },
         }

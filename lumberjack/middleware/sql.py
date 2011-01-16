@@ -113,6 +113,7 @@ class Summary(LoggingMiddleware):
     
     def process_response(self, request, response):
         num_queries = len(connection.queries)
+
         if num_queries:
             unique = set([s['sql'] for s in connection.queries])
             self.logger.debug('%(calls)s queries with %(dupes)s duplicates' % dict(

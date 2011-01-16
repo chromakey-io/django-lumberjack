@@ -1,11 +1,16 @@
 from django.conf import settings
 
 LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+
     'formatters': {
-        'error':{
-            '()':'lumberjack.formatters.tb.TracebackFormatter',
+        'error' : {
+            '()': 'lumberjack.formatters.tb.TracebackFormatter',
             'output':'terminal',
-            },
+            'format' : ('%(client_ip)s - [%(date_time)s] - "%(request_method)s"'
+                        '%(content_length)s [%(url)s] \n %(exc_text)s' ),
+        },
         'sql' : {
             '()':'lumberjack.formatters.sql.SQLFormatter',
             'format':'[%(name)s] %(levelname)s (%(duration)sms) %(message)s',
@@ -21,13 +26,13 @@ LOGGING = {
         },
     },
     'handlers' : {
-        'sqlstream' : {
-            'class' : 'logging.StreamHandler',
-            'formatter' : 'sql',
-        },
         'errorstream' : {
             'class' : 'logging.StreamHandler',
             'formatter' : 'error',
+            },
+        'sqlstream' : {
+            'class' : 'logging.StreamHandler',
+            'formatter' : 'sql',
             },
         'ajaxstream' : {
             'class' : 'logging.StreamHandler',

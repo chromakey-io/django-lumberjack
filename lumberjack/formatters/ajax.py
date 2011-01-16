@@ -10,7 +10,7 @@ import cStringIO, traceback
 
 class AjaxFormatter:
 
-    def __init__(self, fmt=None, output=None):
+    def __init__(self, fmt=None, output='terminal'):
         """
         Initialize the formatter with specified format strings.
 
